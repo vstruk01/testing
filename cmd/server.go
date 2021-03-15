@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"../corner"
+	"github.com/vstruk01/testing/corner"
 )
 
 func main() {
