@@ -7,10 +7,9 @@ import (
 	"io"
 	"math/cmplx"
 	"net/http"
-	"os"
 )
 
-func handleMandelbrot(w http.ResponseWriter, r *http.Request) {
+func HandleMandelbrot(w http.ResponseWriter, r *http.Request) {
 	mandelbrot(w)
 }
 
@@ -30,7 +29,7 @@ func mandelbrot(w io.Writer) {
 			img.Set(px, py, mandelbrotCalculate(z))
 		}
 	}
-	png.Encode(os.Stdout, img) // NOTE: ignoring errors
+	png.Encode(w, img) // NOTE: ignoring errors
 }
 
 func mandelbrotCalculate(z complex128) color.Color {
