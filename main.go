@@ -7,10 +7,7 @@ import (
 
 	"github.com/vstruk01/testing/popcount"
 	"github.com/vstruk01/testing/workerpool"
-	// "github.com/vstruk01/testing/workerpool"
 )
-
-// "github.com/vstruk01/testing/workerpool"
 
 func main() {
 	// x, y := 5, 3
@@ -30,17 +27,6 @@ func main() {
 		}, i)
 		allTask = append(allTask, task)
 	}
-
-	pool := workerpool.NewPool(allTask, 5)
-	pool.RunBackground()
-
-	pool.AddTask(workerpool.NewTask(func(data interface{}) error {
-		taskID := data.(int)
-		time.Sleep(100 * time.Millisecond)
-		fmt.Printf("Task %d processed\n", taskID)
-		return nil
-	}, 244))
-	pool.Stop()
 
 	pool := workerpool.NewPool(allTask, 5)
 	go func() {
