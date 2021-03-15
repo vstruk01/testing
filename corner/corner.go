@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	width, height = 2000, 920           // canvas size in pixels
+	width, height = 2000, 1066          // canvas size in pixels
 	cells         = 100                 // number of grid cells
 	xyrange       = 30.0                // axis ranges (-xyrange..+xyrange)
 	xyscale       = width / 2 / xyrange // pixels per x or y unit
@@ -16,7 +16,10 @@ const (
 	angle         = math.Pi / 6         // angle of x, y axes (=30°)
 )
 
-var sin30, cos30 = math.Sin(angle), math.Cos(angle) // sin(30°), cos(30°)
+var (
+	sin30 = math.Sin(angle) // sin(30°)
+	cos30 = math.Cos(angle) // cos(30°)
+)
 
 func GetCorner(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("ContentType", "image/svg+xml")
@@ -37,7 +40,7 @@ func corner(w io.Writer) {
 				ax, ay, bx, by, cx, cy, dx, dy)
 		}
 	}
-	fmt.Fprintln(w, "</svg></div>")
+	fmt.Fprintln(w, "</svg><div>")
 }
 
 func cornerCalculate(i, j int) (float64, float64) {
