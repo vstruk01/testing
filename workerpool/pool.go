@@ -47,17 +47,3 @@ func (p *Pool) Stop() {
 
 	p.runBackground <- true
 }
-
-func (p *Pool) Run() {
-	for i := 1; i <= p.concurrency; i++ {
-		worker := NewWorker(p.collector, i)
-		worker.Start(&p.wg)
-	}
-
-	for i := range p.Tasks {
-		p.collector <- p.Tasks[i]
-	}
-	close(p.collector)
-
-	p.wg.Wait()
-}

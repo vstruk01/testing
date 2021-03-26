@@ -2,7 +2,6 @@ package workerpool
 
 import (
 	"fmt"
-	"sync"
 )
 
 type Worker struct {
@@ -17,18 +16,6 @@ func NewWorker(channel chan *Task, ID int) *Worker {
 		taskChan: channel,
 		quit:     make(chan bool),
 	}
-}
-
-func (wr *Worker) Start(wg *sync.WaitGroup) {
-	fmt.Printf("Starting worker %d\n", wr.ID)
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		for task := range wr.taskChan {
-			process(wr.ID, task)
-		}
-	}()
 }
 
 func (wr *Worker) StartBackground() {
