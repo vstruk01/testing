@@ -6,18 +6,142 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math/rand"
+	"math"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
 	"unicode"
 	"unicode/utf8"
-
-	"github.com/vstruk01/testing/workerpool"
 )
 
+type (
+	Test2 struct {
+		Feild int
+		Id    int
+	}
+
+	Obj struct {
+		M   map[uint64]struct{}
+		Mut sync.RWMutex
+	}
+)
+
+var (
+	m = map[int]*Test2{}
+)
+
+type First struct {
+	Second
+}
+
+type Second struct {
+	H string
+}
+
+func (s *Second) SayHello(name string) {
+	fmt.Printf("Hello %s", name)
+}
+
 func main() {
+	var c chan string
+	// c = make(chan string, 1)
+	wg := new(sync.WaitGroup)
+	wg.Add(2)
+	go func() {
+		c <- "vlad"
+		wg.Done()
+	}()
+	go func() {
+		fmt.Println(<-c)
+		wg.Done()
+	}()
+	wg.Wait()
+}
+
+func Embeded() {
+	f := First{}
+	f.SayHello(f.H)
+	fmt.Println(f.H)
+
+}
+
+func testUTC() {
+	utc := time.Now().UTC()
+	fmt.Println(utc)
+	local := utc
+	location, err := time.LoadLocation("Europe/Budapest")
+	if err == nil {
+		local = local.In(location)
+	}
+	fmt.Println("UTC", utc.Format("15:04"), local.Location(), local.Format("15:04"))
+	local = utc
+	location, err = time.LoadLocation("America/Los_Angeles")
+	if err == nil {
+		local = local.In(location)
+	}
+	fmt.Println("UTC", utc.Format("15:04"), local.Location(), local.Format("15:04"))
+}
+
+func testForWait(ch chan bool, t time.Duration, o Obj) {
+	time.Sleep(t)
+	ch <- true
+}
+
+func Round(val float64, roundOn float64, places int) (newVal float64) {
+	var round float64
+	pow := math.Pow(10, float64(places))
+	digit := pow * val
+	_, div := math.Modf(digit)
+	fmt.Println("div => ", div)
+	fmt.Println("before => ", round)
+	if div >= roundOn {
+		round = math.Ceil(digit)
+	} else {
+		round = math.Floor(digit)
+	}
+	fmt.Println(" after => ", round)
+	newVal = round / pow
+	fmt.Println("newVal => ", newVal)
+	return
+}
+
+func FormMap(m map[uint64]int) {
+	m[1]++
+	m[2]++
+}
+
+func printPhrases() {
+	phrases := []string{"make me happy", "let`s go", "I got",
+		"what`s up men", "it is simple",
+		"try it", "I have too long phrase now"}
+
+	for _, phrase := range phrases {
+		fmt.Printf("%30s\n", phrase)
+	}
+}
+
+func round(val float64, roundOn float64, places int) (newVal float64) {
+	var round float64
+	pow := math.Pow(10, float64(places))
+	digit := pow * val
+	_, div := math.Modf(digit)
+	if div >= roundOn {
+		round = math.Ceil(digit)
+	} else {
+		round = math.Floor(digit)
+	}
+	newVal = round / pow
+	return
+}
+
+func adder() func(int) int {
+	sum := 0
+	return func(x int) int {
+		sum += x
+		return sum
+	}
 }
 
 type test1 struct {
@@ -143,38 +267,4 @@ func testSlice() {
 		fmt.Println(test)
 		time.Sleep(time.Second * 1)
 	}
-}
-
-func CreateRunWorkerPool() {
-	var allTask []*workerpool.Task
-	for i := 1; i <= 100; i++ {
-		task := workerpool.NewTask(func(data interface{}) error {
-			taskID := data.(int)
-			time.Sleep(100 * time.Millisecond)
-			fmt.Printf("Task %d processed\n", taskID)
-			return nil
-		}, i)
-		allTask = append(allTask, task)
-	}
-
-	pool := workerpool.NewPool(allTask, 5)
-	go func() {
-		for {
-			taskID := rand.Intn(100) + 20
-
-			if taskID%7 == 0 {
-				pool.Stop()
-			}
-
-			time.Sleep(time.Duration(rand.Intn(5)) * time.Second)
-			task := workerpool.NewTask(func(data interface{}) error {
-				taskID := data.(int)
-				time.Sleep(100 * time.Millisecond)
-				fmt.Printf("Task %d processed\n", taskID)
-				return nil
-			}, taskID)
-			pool.AddTask(task)
-		}
-	}()
-	pool.RunBackground()
 }
